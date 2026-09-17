@@ -1,7 +1,12 @@
 import { io, Socket } from 'socket.io-client';
 
-// Read the backend URL from the Vite env variable (set in .env or deployment env)
-const BACKEND_URL = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:4000';
+// Read the backend URL from the Vite env variable (set in .env or deployment env).
+// Vercel env vars must include the protocol, e.g. https://your-app.up.railway.app
+const rawBackendUrl = import.meta.env.VITE_BACKEND_URL ?? 'http://localhost:4000';
+const BACKEND_URL =
+  rawBackendUrl.startsWith('http://') || rawBackendUrl.startsWith('https://')
+    ? rawBackendUrl
+    : `https://${rawBackendUrl}`;
 
 /**
  * We create ONE socket instance for the whole app.
