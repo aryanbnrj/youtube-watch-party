@@ -1,0 +1,20 @@
+# Render.com deployment configuration
+# Deploys the backend as a Web Service on Render.
+# Push this file to GitHub, then import the repo on render.com.
+
+services:
+  - type: web
+    name: youtube-watch-party-backend
+    runtime: node
+    rootDir: backend
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 4000
+      - key: FRONTEND_URL
+        # Set this to your actual frontend URL after deploying the frontend
+        value: https://your-frontend-domain.vercel.app
+    autoDeploy: true
