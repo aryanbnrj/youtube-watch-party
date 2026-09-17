@@ -3,6 +3,7 @@ import { createServer } from 'http';
 import { Server } from 'socket.io';
 import { createApp } from './app';
 import { registerSocketHandlers } from './socket/socketHandlers';
+import { getAllowedOrigins, isOriginAllowed } from './utils/corsOrigins';
 
 const PORT = parseInt(process.env.PORT ?? '4000', 10);
 const FRONTEND_URL = process.env.FRONTEND_URL ?? 'http://localhost:5173';
@@ -14,8 +15,13 @@ const httpServer = createServer(app);
 // ── Socket.IO server ─────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
   cors: {
-    // Support comma-separated list of origins for multi-environment deploys
-    origin: FRONTEND_URL.split(',').map((o) => o.trim()),
+    origin: (origin, callback) => {
+      if (isOriginAllowed(origin)) {
+        callback(null, true);
+      } else {
+        callback(new Error(`CORS: origin ${origin} not allowed`));
+      }
+    },
     methods: ['GET', 'POST'],
     credentials: true,
   },
@@ -32,7 +38,15 @@ io.on('connection', (socket) => {
 // ── Start listening ──────────────────────────────────────────────────────────
 httpServer.listen(PORT, () => {
   console.log(`[Server] YouTube Watch Party backend running on port ${PORT}`);
-  console.log(`[Server] Allowed frontend origin: ${FRONTEND_URL}`);
+  console.log(`[Server] Allowed frontend origins: ${getAllowedOrigins().join(', ')}`);
+  if (
+    process.env.NODE_ENV === 'production' &&
+    getAllowedOrigins().every((origin) => origin.includes('localhost'))
+  ) {
+    console.warn(
+      '[Server] FRONTEND_URL is still localhost — also allowing https://*.vercel.app in production'
+    );
+  }
   console.log(`[Server] Environment: ${process.env.NODE_ENV ?? 'development'}`);
 });
 

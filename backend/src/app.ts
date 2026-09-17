@@ -1,21 +1,15 @@
 import express, { Request, Response } from 'express';
 import cors from 'cors';
+import { isOriginAllowed } from './utils/corsOrigins';
 
 export function createApp(): express.Application {
   const app = express();
 
   // ── CORS ───────────────────────────────────────────────────────────────────
-  // In production, FRONTEND_URL is set in the environment.
-  // Multiple origins supported via comma-separated list.
-  const allowedOrigins = (process.env.FRONTEND_URL ?? 'http://localhost:5173')
-    .split(',')
-    .map((o) => o.trim());
-
   app.use(
     cors({
       origin: (origin, callback) => {
-        // Allow requests with no origin (e.g. curl, Postman) in dev
-        if (!origin || allowedOrigins.includes(origin)) {
+        if (isOriginAllowed(origin)) {
           callback(null, true);
         } else {
           callback(new Error(`CORS: origin ${origin} not allowed`));
