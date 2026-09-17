@@ -1,10 +1,10 @@
 {
   "name": "youtube-watch-party",
   "version": "1.0.0",
-  "description": "YouTube Watch Party backend",
+  "description": "YouTube Watch Party - monorepo root",
   "scripts": {
     "build": "cd backend && npm install && npm run build",
-    "start": "cd backend && npm start"
+    "start": "node backend/dist/server.js"
   },
   "engines": {
     "node": ">=18.0.0"
